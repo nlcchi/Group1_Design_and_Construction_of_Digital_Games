@@ -78,7 +78,6 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-
     // Load a virtual scene (only change background & dialogue, not Unity scenes)
     public void LoadVirtualScene(string sceneName)
     {
@@ -115,8 +114,6 @@ public class DialogueManager : MonoBehaviour
         choicePanel.SetActive(false);
         ShowDialogue();
     }
-
-
 
     private void ShowDialogue()
     {

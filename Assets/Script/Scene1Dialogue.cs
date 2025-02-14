@@ -40,9 +40,9 @@ public class Scene1Dialogue : MonoBehaviour
                 new DialogueManager.Dialogue { speaker = "Player", portrait = playerSprite, content = "Rome needs strong leadership." },
                 new DialogueManager.Dialogue { speaker = "Cassius", portrait = CassiusSprite, content = "Not everyone agrees. Beware of those who smile in your presence but plot behind your back." }
             },
-                choices = new List<DialogueManager.Choice>
+            choices = new List<DialogueManager.Choice>
             {
-                new DialogueManager.Choice { text = "Go to the Senate", nextScene = "Scene2" }
+                new DialogueManager.Choice { text = "Go to the Senate", nextScene = "Scene2" },
             },
 
         };
