@@ -51,13 +51,23 @@ public class DialogueManager : MonoBehaviour
     public Button nextButton;
     public GameObject choicePanel;
     public GameObject choiceButtonPrefab;
+    public Sprite defaultPortrait;
+    //public Image dialogueBackground;
 
     private DialogueData currentDialogueData;
     private int currentDialogueIndex;
 
     private float normalOpacity = 1f;
     private float dimOpacity = 0.5f;
-    private string lastNpcName = ""; 
+    private string lastNpcName = "";
+
+    public AudioSource audioSource; // 用于播放所有音效
+    public AudioSource bgmSource;   // 用于播放背景音乐
+
+    public AudioClip nextDialogueSound; // 点击 Next 按钮时的音效
+    public AudioClip choiceClickSound;  // 点击选项时的音效
+
+    private Dictionary<string, AudioClip> sceneMusic = new Dictionary<string, AudioClip>(); // 存储场景背景音乐
 
     // Stores all virtual scenes
     private Dictionary<string, (Sprite, DialogueData)> sceneDatabase = new Dictionary<string, (Sprite, DialogueData)>();
@@ -65,11 +75,17 @@ public class DialogueManager : MonoBehaviour
     public static DialogueManager Instance;
 
     // Register a virtual scene
-    public void RegisterScene(string sceneName, Sprite background, DialogueData dialogueData)
+    public void RegisterScene(string sceneName, Sprite background, DialogueData dialogueData, AudioClip bgmClip)
     {
         if (!sceneDatabase.ContainsKey(sceneName))
         {
             sceneDatabase.Add(sceneName, (background, dialogueData));
+
+            if (bgmClip != null)
+            {
+                sceneMusic[sceneName] = bgmClip; // 绑定场景音乐
+            }
+
             Debug.Log($"Scene {sceneName} successfully registered.");
         }
         else
@@ -92,10 +108,24 @@ public class DialogueManager : MonoBehaviour
                 SetBackground(newBackground);
             }
             StartDialogue(newDialogueData);
+            PlayBGM(sceneName);
         }
         else
         {
             Debug.LogError($"Scene {sceneName} is not registered!");
+        }
+    }
+    private void PlayBGM(string sceneName)
+    {
+        if (sceneMusic.ContainsKey(sceneName))
+        {
+            AudioClip newBgm = sceneMusic[sceneName];
+
+            if (bgmSource.clip != newBgm) // 防止重复播放相同音乐
+            {
+                bgmSource.clip = newBgm;
+                bgmSource.Play();
+            }
         }
     }
 
@@ -121,6 +151,12 @@ public class DialogueManager : MonoBehaviour
         {
             Dialogue dialogue = currentDialogueData.dialogues[currentDialogueIndex];
             dialogueText.text = dialogue.content;
+            //AdjustDialogueBackground();
+
+            if (nextDialogueSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(nextDialogueSound); // ✅ 播放对话推进音效
+            }
 
             if (dialogue.speaker == "Player")
             {
@@ -134,6 +170,15 @@ public class DialogueManager : MonoBehaviour
 
                 // 设置透明度：玩家 100%，NPC 50%
                 SetPortraitOpacity(playerPortrait, normalOpacity);
+                SetPortraitOpacity(npcPortrait, dimOpacity);
+            }
+            else if(dialogue.speaker == "Narrator")
+            {
+                playerNameText.text = "";
+                npcNameText.text = "";
+                playerPortrait.sprite = defaultPortrait;
+                npcPortrait.sprite = defaultPortrait;
+                SetPortraitOpacity(playerPortrait, dimOpacity);
                 SetPortraitOpacity(npcPortrait, dimOpacity);
             }
             else
@@ -160,6 +205,18 @@ public class DialogueManager : MonoBehaviour
             ShowChoices();
         }
     }
+    //private void AdjustDialogueBackground()
+    //{
+    //    if (dialogueBackground != null && dialogueText != null)
+    //    {
+    //        // 获取文本的 `RectTransform`
+    //        RectTransform textRect = dialogueText.GetComponent<RectTransform>();
+    //        RectTransform bgRect = dialogueBackground.GetComponent<RectTransform>();
+
+    //        // 让背景大小适应文本
+    //        bgRect.sizeDelta = new Vector2(textRect.sizeDelta.x + 40f, textRect.sizeDelta.y + 20f);
+    //    }
+    //}
 
 
     private void SetPortraitOpacity(Image portrait, float opacity)
@@ -201,6 +258,11 @@ public class DialogueManager : MonoBehaviour
 
     private void OnChoiceSelected(Choice choice)
     {
+        if (choiceClickSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(choiceClickSound); // 播放选项点击音效
+        }
+
         if (!string.IsNullOrEmpty(choice.nextScene))
         {
             Debug.Log($"Attempting to switch to: {choice.nextScene}");

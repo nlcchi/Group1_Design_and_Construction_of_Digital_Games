@@ -7,6 +7,7 @@ public class Scene2Dialogue : MonoBehaviour
     public Sprite playerSprite;
     public Sprite CiceroSprite;
     public Sprite backgroundScene2;
+    public AudioClip scene2Music;
 
     void Start()
     {
@@ -53,7 +54,7 @@ public class Scene2Dialogue : MonoBehaviour
             }
         };
 
-        DialogueManager.Instance.RegisterScene("Scene2", backgroundScene2, sceneDialogue);
+        DialogueManager.Instance.RegisterScene("Scene2", backgroundScene2, sceneDialogue, scene2Music);
         Debug.Log("Scene2 successfully registered.");
     }
 }
