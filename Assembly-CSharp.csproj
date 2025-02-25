@@ -61,8 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\Scene1Dialogue.cs" />
+    <Compile Include="Assets\Script\Loyalty\LoyaltyManager.cs" />
+    <Compile Include="Assets\Script\Loyalty\LoyaltyUI.cs" />
     <Compile Include="Assets\Script\DialogueManager.cs" />
     <Compile Include="Assets\Script\Scene2Dialogue.cs" />
+    <Compile Include="Assets\Script\Loyalty\ChoiceManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

@@ -61,6 +61,8 @@ public class DialogueManager : MonoBehaviour
     private float dimOpacity = 0.5f;
     private string lastNpcName = "";
 
+    public Image fadePanel;
+
     public AudioSource audioSource; // 用于播放所有音效
     public AudioSource bgmSource;   // 用于播放背景音乐
 
@@ -105,16 +107,68 @@ public class DialogueManager : MonoBehaviour
 
             if (newBackground != null)
             {
-                SetBackground(newBackground);
+                StartCoroutine(SceneTransition(newBackground, newDialogueData)); // ✅ 执行渐变
             }
-            StartDialogue(newDialogueData);
-            PlayBGM(sceneName);
+            else
+            {
+                StartDialogue(newDialogueData);
+            }
         }
         else
         {
             Debug.LogError($"Scene {sceneName} is not registered!");
         }
     }
+    private IEnumerator SceneTransition(Sprite newBackground, DialogueData newDialogueData)
+    {
+        yield return StartCoroutine(FadeToBlack()); // ✅ 变黑
+        SetBackground(newBackground); // ✅ 切换背景
+        yield return StartCoroutine(FadeToClear()); // ✅ 变亮
+
+        StartDialogue(newDialogueData);
+    }
+    private IEnumerator FadeToBlack()
+    {
+        float duration = 0.5f; // 变黑时间
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+            SetFadePanelAlpha(alpha);
+            yield return null;
+        }
+
+        SetFadePanelAlpha(1f); // 确保最终完全黑
+    }
+
+    private IEnumerator FadeToClear()
+    {
+        float duration = 0.5f; // 变亮时间
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
+            SetFadePanelAlpha(alpha);
+            yield return null;
+        }
+
+        SetFadePanelAlpha(0f); // 确保最终完全透明
+    }
+
+    private void SetFadePanelAlpha(float alpha)
+    {
+        if (fadePanel != null)
+        {
+            Color color = fadePanel.color;
+            color.a = alpha;
+            fadePanel.color = color;
+        }
+    }
+
     private void PlayBGM(string sceneName)
     {
         if (sceneMusic.ContainsKey(sceneName))
@@ -260,8 +314,13 @@ public class DialogueManager : MonoBehaviour
     {
         if (choiceClickSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(choiceClickSound); // 播放选项点击音效
+            audioSource.PlayOneShot(choiceClickSound); // ✅ 播放选项点击音效
         }
+
+        Debug.Log($"Player selected: {choice.text}"); // ✅ 记录玩家选项
+
+        // ✅ 修改忠诚度（如果选项影响忠诚度）
+        ApplyLoyaltyEffects(choice.text);
 
         if (!string.IsNullOrEmpty(choice.nextScene))
         {
@@ -287,6 +346,37 @@ public class DialogueManager : MonoBehaviour
             choicePanel.SetActive(false);
         }
     }
+    private void ApplyLoyaltyEffects(string choiceText)
+    {
+        if (LoyaltyManager.Instance == null)
+        {
+            Debug.LogError("LoyaltyManager is NULL! Make sure it is in the scene.");
+            return;
+        }
+
+        switch (choiceText)
+        {
+            case "Support Brutus":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -1);
+                break;
+
+            case "Oppose Brutus":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", -4);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
+                break;
+
+            case "Side with Mark Antony":
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 3);
+                LoyaltyManager.Instance.ChangeLoyalty("Cicero", -3);
+                break;
+
+            default:
+                Debug.Log("No loyalty change for this choice.");
+                break;
+        }
+    }
+
 
 }
 

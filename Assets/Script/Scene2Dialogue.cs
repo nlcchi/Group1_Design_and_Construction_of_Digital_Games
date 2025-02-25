@@ -42,15 +42,8 @@ public class Scene2Dialogue : MonoBehaviour
             },
             choices = new List<DialogueManager.Choice>
             {
-                new DialogueManager.Choice
-                {
-                    text = "Enter the Hall",
-                    followUpDialogues = new List<DialogueManager.Dialogue>
-                    {
-                        new DialogueManager.Dialogue { speaker = "Cicero", portrait = CiceroSprite, content = "The senators are waiting for you inside." }
-                    }
-                },
-                new DialogueManager.Choice { text = "Return to the streets", nextScene = "Scene1" }
+                new DialogueManager.Choice { text = "Side with Mark Antony", nextScene = "Scene3" },
+                new DialogueManager.Choice { text = "Remain neutral", nextScene = "Scene3" }
             }
         };
 

@@ -48,8 +48,9 @@ public class Scene1Dialogue : MonoBehaviour
             },
             choices = new List<DialogueManager.Choice>
             {
-                new DialogueManager.Choice { text = "Go to the Senate", nextScene = "Scene2" },
-            },
+                new DialogueManager.Choice { text = "Support Brutus", nextScene = "Scene2" },
+                new DialogueManager.Choice { text = "Oppose Brutus", nextScene = "Scene2" }
+            }
 
         };
 
