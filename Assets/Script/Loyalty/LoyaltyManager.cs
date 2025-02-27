@@ -55,7 +55,7 @@ public class LoyaltyManager : MonoBehaviour
                 case "Mark Antony":
                     SetTextValue(2);
                     break;
-                case "Cicero":
+                case "Senate":
                     SetTextValue(3);
                     break;
             }
@@ -84,7 +84,7 @@ public class LoyaltyManager : MonoBehaviour
         int brutusLoyalty = GetLoyalty("Brutus");
         int cassiusLoyalty = GetLoyalty("Cassius");
         int antonyLoyalty = GetLoyalty("Mark Antony");
-        int ciceroLoyalty = GetLoyalty("Cicero");
+        int senateLoyalty = GetLoyalty("Senate");
 
         // 结局1：如果 Brutus 和 Cassius 的忠诚度高，凯撒被暗杀
         if (brutusLoyalty > 5 && cassiusLoyalty > 3)
@@ -93,13 +93,13 @@ public class LoyaltyManager : MonoBehaviour
         }
 
         // 结局2：如果 Mark Antony 和 Cicero 忠诚度高，凯撒掌控罗马
-        if (antonyLoyalty > 5 && ciceroLoyalty > 3)
+        if (antonyLoyalty > 5 && senateLoyalty > 3)
         {
             return "Caesar consolidates power and controls Rome.";
         }
 
         // 结局3：如果所有人忠诚度都很低，罗马陷入内战
-        if (brutusLoyalty < -5 && cassiusLoyalty < -5 && antonyLoyalty < -5 && ciceroLoyalty < -5)
+        if (brutusLoyalty < -5 && cassiusLoyalty < -5 && antonyLoyalty < -5 && senateLoyalty < -5)
         {
             return "Rome falls into chaos and civil war erupts.";
         }
