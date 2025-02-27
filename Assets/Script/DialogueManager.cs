@@ -60,6 +60,7 @@ public class DialogueManager : MonoBehaviour
     private float normalOpacity = 1f;
     private float dimOpacity = 0.5f;
     private string lastNpcName = "";
+    private string currentNextScene = ""; // 存储选择后的目标场景
 
     public Image fadePanel;
 
@@ -86,6 +87,7 @@ public class DialogueManager : MonoBehaviour
             if (bgmClip != null)
             {
                 sceneMusic[sceneName] = bgmClip; // 绑定场景音乐
+                Debug.Log($"Scene music {bgmClip} successfully registered.");
             }
 
             Debug.Log($"Scene {sceneName} successfully registered.");
@@ -113,6 +115,7 @@ public class DialogueManager : MonoBehaviour
             {
                 StartDialogue(newDialogueData);
             }
+            PlayBGM(sceneName);
         }
         else
         {
@@ -175,13 +178,36 @@ public class DialogueManager : MonoBehaviour
         {
             AudioClip newBgm = sceneMusic[sceneName];
 
-            if (bgmSource.clip != newBgm) // 防止重复播放相同音乐
+            if (bgmSource == null)
             {
+                Debug.LogError("❌ BGM AudioSource is NULL! Make sure it is assigned in the Inspector.");
+                return;
+            }
+
+            if (bgmSource.clip != newBgm) // ✅ 防止重复播放相同音乐
+            {
+                Debug.Log($"🎵 Attempting to play BGM: {newBgm.name} for {sceneName}");
+
                 bgmSource.clip = newBgm;
+                bgmSource.loop = true; // ✅ 确保背景音乐循环播放
+                bgmSource.volume = 1.0f; // ✅ 确保音量正常
+                bgmSource.mute = false;  // ✅ 确保未静音
                 bgmSource.Play();
+
+                Debug.Log($"🎶 Now playing: {sceneName} BGM -> {newBgm.name}");
+            }
+            else
+            {
+                Debug.Log($"🔄 BGM for {sceneName} is already playing.");
             }
         }
+        else
+        {
+            Debug.LogWarning($"⚠ No BGM found for {sceneName}");
+        }
     }
+
+
 
     public void SetBackground(Sprite newBackground)
     {
@@ -255,8 +281,17 @@ public class DialogueManager : MonoBehaviour
             choicePanel.SetActive(false);
         }
         else
-        {
-            ShowChoices();
+        {        // ✅ 处理 followUpDialogues 结束后是否切换场景
+            if (!string.IsNullOrEmpty(currentNextScene))
+            {
+                Debug.Log($"Follow-up dialogues finished. Switching to {currentNextScene}");
+                LoadVirtualScene(currentNextScene); // ✅ 结束后自动切换
+                currentNextScene = ""; // ✅ 清空，防止错误调用
+            }
+            else
+            {
+                ShowChoices();
+            }
         }
     }
     //private void AdjustDialogueBackground()
@@ -319,8 +354,19 @@ public class DialogueManager : MonoBehaviour
 
         Debug.Log($"Player selected: {choice.text}"); // ✅ 记录玩家选项
 
-        // ✅ 修改忠诚度（如果选项影响忠诚度）
+        // 修改忠诚度（如果选项影响忠诚度）
         ApplyLoyaltyEffects(choice.text);
+        currentNextScene = choice.nextScene;
+
+        // ✅ 先播放 followUpDialogues，而不是直接切换场景
+        if (choice.followUpDialogues != null && choice.followUpDialogues.Count > 0)
+        {
+            Debug.Log(" Playing follow-up dialogues before scene switch.");
+            currentDialogueData.dialogues = choice.followUpDialogues;
+            currentDialogueIndex = 0;
+            ShowDialogue(); // ✅ 进入 follow-up 对话模式
+            return; // ✅ 先播放对话，暂时不切换场景
+        }
 
         if (!string.IsNullOrEmpty(choice.nextScene))
         {
@@ -346,6 +392,7 @@ public class DialogueManager : MonoBehaviour
             choicePanel.SetActive(false);
         }
     }
+
     private void ApplyLoyaltyEffects(string choiceText)
     {
         if (LoyaltyManager.Instance == null)
@@ -356,19 +403,62 @@ public class DialogueManager : MonoBehaviour
 
         switch (choiceText)
         {
-            case "Support Brutus":
+            case "Humble Reject":
                 LoyaltyManager.Instance.ChangeLoyalty("Brutus", 2);
-                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -1);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", -2);
                 break;
 
-            case "Oppose Brutus":
+            case "Humble Acceptance":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", -1);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -2);
+                break;
+
+            case "Arrogant Declaration ('I am Rome!')":
                 LoyaltyManager.Instance.ChangeLoyalty("Brutus", -4);
                 LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
                 break;
 
-            case "Side with Mark Antony":
+            case "Accept the Crown":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 2);
+                break;
+
+            case "Refuse the Crown":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", 1);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", -2);
+                break;
+
+            case "Publicly Condemn the Senate for Not Offering it":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", -4);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -4);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -4);
                 LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 3);
-                LoyaltyManager.Instance.ChangeLoyalty("Cicero", -3);
+                break;
+
+            case "Order Spies to Watch the Senate":
+                LoyaltyManager.Instance.ChangeLoyalty("Brutus", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -2);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 2);
+                break;
+
+            case "Ignore the Rumors":
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", -2);
+                break;
+
+            case "Confront Brutus About His Loyalty":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", -1);
+                break;
+
+            case "Stay Home on March 15":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
                 break;
 
             default:
@@ -376,7 +466,23 @@ public class DialogueManager : MonoBehaviour
                 break;
         }
     }
+    private void ShowGameEnding()
+    {
+        if (LoyaltyManager.Instance == null)
+        {
+            Debug.LogError(" LoyaltyManager is NULL! Cannot determine game ending.");
+            return;
+        }
 
+        string ending = LoyaltyManager.Instance.DetermineGameEnding();
+        Debug.Log(" Game Ending: " + ending);
+
+        // 在对话框里显示游戏结局
+        dialogueText.text = ending;
+
+        // 禁用 "Next" 按钮（游戏结束）
+        nextButton.gameObject.SetActive(false);
+    }
 
 }
 
