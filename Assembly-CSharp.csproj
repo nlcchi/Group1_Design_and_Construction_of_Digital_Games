@@ -67,6 +67,7 @@
     <Compile Include="Assets\Script\Scenes\Scene5Dialogue.cs" />
     <Compile Include="Assets\Script\Scenes\Scene3Dialogue.cs" />
     <Compile Include="Assets\Script\Scenes\Scene4Dialogue.cs" />
+    <Compile Include="Assets\Script\Scenes\TemporaryFinalScene.cs" />
     <Compile Include="Assets\Script\Loyalty\ChoiceManager.cs" />
     <Compile Include="Assets\Script\Scenes\Scene1Dialogue.cs" />
   </ItemGroup>

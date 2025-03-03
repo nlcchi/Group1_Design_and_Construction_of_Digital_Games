@@ -13,14 +13,7 @@ public class LoyaltyManager : MonoBehaviour
 
 
     // Dictionary to track NPC loyalty
-    public Dictionary<string, int> npcLoyalty = new Dictionary<string, int>
-    {
-        {"Brutus", 2},
-        {"Cassius", -5},
-        {"Mark Antony", 5},
-        {"Cicero", -3},
-        {"Senate", 0}
-    };
+    public Dictionary<string, int> npcLoyalty = new Dictionary<string, int>();
 
     private void Awake()
     {
@@ -28,22 +21,56 @@ public class LoyaltyManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-        }
+            Debug.Log("✅ LoyaltyManager initialized and set to DontDestroyOnLoad.");
 
+            if (npcLoyalty == null || npcLoyalty.Count == 0)
+            {
+                InitializeLoyaltyValues();
+            }
+        }
         else
+        {
+            Debug.LogWarning("⚠️ Duplicate LoyaltyManager found. Destroying the new instance.");
             Destroy(gameObject);
+        }
     }
+
+    private void InitializeLoyaltyValues()
+    {
+        if (npcLoyalty == null || npcLoyalty.Count == 0)
+        {
+            npcLoyalty = new Dictionary<string, int>
+        {
+            {"Brutus", 2},
+            {"Cassius", -5},
+            {"Mark Antony", 5},
+            {"Senate", 0}
+        };
+            Debug.Log("🏛 Loyalty values initialized to default.");
+        }
+        else
+        {
+            Debug.Log("🔍 Loyalty values already initialized, keeping current values.");
+        }
+    }
+
+
 
     // Function to modify loyalty based on player's choices
     public void ChangeLoyalty(string character, int amount)
     {
+        if (npcLoyalty == null || npcLoyalty.Count == 0)
+        {
+            Debug.LogWarning("⚠️ Loyalty data not initialized. Initializing default values.");
+            InitializeLoyaltyValues();
+        }
+
         if (npcLoyalty.ContainsKey(character))
         {
             npcLoyalty[character] += amount;
             npcLoyalty[character] = Mathf.Clamp(npcLoyalty[character], -10, 10);
             textValue = npcLoyalty[character].ToString();
-            Debug.Log(character + " loyalty is now: " + textValue);
-
+            Debug.Log($"🔄 {character} loyalty updated to: {npcLoyalty[character]}");
             switch (character)
             {
                 case "Brutus":
@@ -60,14 +87,24 @@ public class LoyaltyManager : MonoBehaviour
                     break;
             }
         }
+        else
+        {
+             Debug.LogWarning($"⚠️ Character {character} not found in loyalty dictionary.");
+        }
+        
     }
 
     public int GetLoyalty(string character)
     {
-        return npcLoyalty.ContainsKey(character) ? npcLoyalty[character] : 0;
+        return npcLoyalty.ContainsKey(character) ? npcLoyalty[character] : -11;
     }
     public Dictionary<string, int> GetAllLoyalty()
     {
+        if (npcLoyalty == null || npcLoyalty.Count == 0)
+        {
+            Debug.LogWarning("⚠️ Loyalty data not initialized. Initializing default values.");
+            InitializeLoyaltyValues();
+        }
         return new Dictionary<string, int>(npcLoyalty); // 返回副本，防止外部修改数据
     }
     private void SetTextValue(int slot)
@@ -86,23 +123,36 @@ public class LoyaltyManager : MonoBehaviour
         int antonyLoyalty = GetLoyalty("Mark Antony");
         int senateLoyalty = GetLoyalty("Senate");
 
-        // 结局1：如果 Brutus 和 Cassius 的忠诚度高，凯撒被暗杀
-        if (brutusLoyalty > 5 && cassiusLoyalty > 3)
+        // 结局1：凯撒被暗杀（Brutus 和 Cassius 的忠诚度低，Senate 反对）
+        if (brutusLoyalty <= 0 && cassiusLoyalty <= -3 && senateLoyalty <= -3)
         {
             return "Caesar is assassinated by the Senate.";
         }
 
-        // 结局2：如果 Mark Antony 和 Cicero 忠诚度高，凯撒掌控罗马
-        if (antonyLoyalty > 5 && senateLoyalty > 3)
+        // 结局2：凯撒掌控罗马（Mark Antony 和 Senate 的忠诚度较高）
+        if (senateLoyalty >= -3 && antonyLoyalty >= -1)  // Senate 阈值降低，Antony 不必严格大于 0
         {
             return "Caesar consolidates power and controls Rome.";
         }
 
-        // 结局3：如果所有人忠诚度都很低，罗马陷入内战
-        if (brutusLoyalty < -5 && cassiusLoyalty < -5 && antonyLoyalty < -5 && senateLoyalty < -5)
+        // 结局3：罗马陷入内战（Brutus 模棱两可，Cassius 和 Senate 反对）
+        if (brutusLoyalty > -2 && brutusLoyalty < 3 && cassiusLoyalty <= 4 && senateLoyalty <= 4)
         {
             return "Rome falls into chaos and civil war erupts.";
         }
+
+        // 结局4：凯撒流亡（和刺杀条件类似，但可能有不同的分支）
+        if (brutusLoyalty <= 0 && cassiusLoyalty <= -3 && senateLoyalty <= -3)
+        {
+            return "Exile Ending – Caesar Flees Before Assassination";
+        }
+
+        // 结局5：凯撒以恐怖统治（Cassius 和 Senate 忠诚度极低，Antony 依然支持）
+        if (brutusLoyalty <= 0 && cassiusLoyalty <= -5 && senateLoyalty <= -5 && antonyLoyalty >= 3)
+        {
+            return "The Bloody Tyrant Ending – Rule by Fear";
+        }
+
 
         // 默认结局
         return "Caesar's fate remains uncertain, with alliances shifting.";

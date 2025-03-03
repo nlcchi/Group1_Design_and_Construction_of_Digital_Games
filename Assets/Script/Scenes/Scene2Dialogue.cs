@@ -49,7 +49,7 @@ public class Scene2Dialogue : MonoBehaviour
                 new DialogueManager.Dialogue { speaker = "Brutus", portrait = BrutusSprite, content = "Rome has no king!" },
                 new DialogueManager.Dialogue { speaker = "Cassius", portrait = CassiusSprite, content = "Oh Brutus, he wants it. Look at him." },
                 new DialogueManager.Dialogue { speaker = "Player", portrait = playerSprite, content = "(Keep silence)" },
-                new DialogueManager.Dialogue { speaker = "Narrator", content = "Seize the crown, uphold the Republic, or mock the Senate—what will you choose?" }
+                new DialogueManager.Dialogue { speaker = "Narrator", content = "Seize the crown, uphold the Republic, or... what will you choose?" }
             },
             choices = new List<DialogueManager.Choice>
             {
@@ -67,7 +67,7 @@ public class Scene2Dialogue : MonoBehaviour
                     new DialogueManager.Dialogue { speaker = "Narrator", content = " Cassius has to work harder to turn him against you." }
 
             } },
-                new DialogueManager.Choice { text = "Publicly Condemn the Senate for Not Offering it", nextScene = "Scene3",
+                new DialogueManager.Choice { text = "Condemn the Senate for Not Offering it", nextScene = "Scene3",
                     followUpDialogues = new List<DialogueManager.Dialogue>
                 {
                     new DialogueManager.Dialogue { speaker = "Narrator", content = "You are seen as power-hungry, your ambitions laid bare for all to judge." },

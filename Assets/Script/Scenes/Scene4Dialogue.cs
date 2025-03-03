@@ -55,7 +55,7 @@ public class Scene4Dialogue : MonoBehaviour
                 new DialogueManager.Dialogue { speaker = "Brutus", portrait = BrutusSprite, content = "Perhaps fate does not whisper in vain. But then¡­ what is a king if he bends to fear?" },
                 new DialogueManager.Dialogue { speaker = "Cassius", portrait = CassiusSprite, content = "Bah! If we all feared every bad dream, Rome would be ruled by old women. The Senate awaits, Caesar. Let them see the lion, not the lamb!" },
                 new DialogueManager.Dialogue { speaker = "Player", portrait = playerSprite, content = "A lion does not flinch at shadows¡­ yet even lions fall when they walk into a hunter¡¯s trap." },
-                new DialogueManager.Dialogue { speaker = "Narrator", content = "Heed the warning, ignore it, or fake your death? Fate is watching. Choose wisely." },
+                new DialogueManager.Dialogue { speaker = "Narrator", content = "Heed the warning, ignore it, or fake your death? Fate is watching..." },
             },
             choices = new List<DialogueManager.Choice>
             {
@@ -67,7 +67,7 @@ public class Scene4Dialogue : MonoBehaviour
                     followUpDialogues = new List<DialogueManager.Dialogue>
                 {
             }  },
-                new DialogueManager.Choice { text = "Fake Your Death to Catch the Conspirators", nextScene = "",
+                new DialogueManager.Choice { text = "Fake Your Death to Catch the Conspirators", nextScene = "Scene5",
                     followUpDialogues = new List<DialogueManager.Dialogue>
                 {
             } }

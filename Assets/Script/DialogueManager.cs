@@ -34,6 +34,7 @@ public class DialogueManager : MonoBehaviour
         public string text; // Choice text
         public string nextScene; // Name of the next scene
         public List<Dialogue> followUpDialogues; // Follow-up dialogues
+        public string forcedEnding = ""; // ✅ 新增：如果这个选项强制指定结局，则存储结局名称
     }
 
     [System.Serializable]
@@ -58,9 +59,11 @@ public class DialogueManager : MonoBehaviour
     private int currentDialogueIndex;
 
     private float normalOpacity = 1f;
-    private float dimOpacity = 0.5f;
+    private float dimOpacity = 0.1f;
     private string lastNpcName = "";
     private string currentNextScene = ""; // 存储选择后的目标场景
+    private string lastSceneName = ""; // ✅ 存储上一个场景名称
+    public string currentForcedEnding { get; private set; }  // ✅ 存储强制结局
 
     public Image fadePanel;
 
@@ -101,6 +104,15 @@ public class DialogueManager : MonoBehaviour
     // Load a virtual scene (only change background & dialogue, not Unity scenes)
     public void LoadVirtualScene(string sceneName)
     {
+        if (lastSceneName == sceneName)
+        {
+            Debug.LogWarning($"⚠️ Scene '{sceneName}' is already active. Skipping redundant load.");
+            return;
+        }
+
+        lastSceneName = sceneName;
+        Debug.Log($"🔄 Loading virtual scene: {sceneName}");
+
         if (sceneDatabase.ContainsKey(sceneName))
         {
             Debug.Log($"Switching to scene: {sceneName}");
@@ -353,7 +365,16 @@ public class DialogueManager : MonoBehaviour
         }
 
         Debug.Log($"Player selected: {choice.text}"); // ✅ 记录玩家选项
-
+                                                      // ✅ 存储强制结局，如果该选项指定了 `forcedEnding`
+        if (!string.IsNullOrEmpty(choice.forcedEnding))
+        {
+            currentForcedEnding = choice.forcedEnding;
+            Debug.Log($"🎭 Forced Ending Set: {currentForcedEnding}");
+        }
+        else
+        {
+            currentForcedEnding = ""; // ✅ 清空之前的强制结局
+        }
         // 修改忠诚度（如果选项影响忠诚度）
         ApplyLoyaltyEffects(choice.text);
         currentNextScene = choice.nextScene;
@@ -424,17 +445,17 @@ public class DialogueManager : MonoBehaviour
                 LoyaltyManager.Instance.ChangeLoyalty("Brutus", -2);
                 LoyaltyManager.Instance.ChangeLoyalty("Cassius", -2);
                 LoyaltyManager.Instance.ChangeLoyalty("Senate", -2);
-                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 3);
                 break;
 
             case "Refuse the Crown":
                 LoyaltyManager.Instance.ChangeLoyalty("Brutus", 2);
                 LoyaltyManager.Instance.ChangeLoyalty("Cassius", 1);
-                LoyaltyManager.Instance.ChangeLoyalty("Senate", 2);
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", 3);
                 LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", -2);
                 break;
 
-            case "Publicly Condemn the Senate for Not Offering it":
+            case "Condemn the Senate for Not Offering it":
                 LoyaltyManager.Instance.ChangeLoyalty("Brutus", -4);
                 LoyaltyManager.Instance.ChangeLoyalty("Cassius", -4);
                 LoyaltyManager.Instance.ChangeLoyalty("Senate", -4);
@@ -459,6 +480,11 @@ public class DialogueManager : MonoBehaviour
 
             case "Stay Home on March 15":
                 LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+                break;
+
+            case "Fake Your Death to Catch the Conspirators":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", 1);
+                LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 1);
                 break;
 
             default:
