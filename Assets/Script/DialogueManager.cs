@@ -43,6 +43,18 @@ public class DialogueManager : MonoBehaviour
         public List<Dialogue> dialogues; // List of dialogues
         public List<Choice> choices; // List of choices
     }
+
+    // ✅ 修改对话历史的存储结构，保存头像和角色信息
+    [System.Serializable]
+    public class DialogueHistoryEntry
+    {
+        public string speaker;
+        public string content;
+        public Sprite portrait;
+    }
+
+    private List<DialogueHistoryEntry> dialogueHistory = new List<DialogueHistoryEntry>();
+
     public Image backgroundPanel;
     public Image playerPortrait;
     public Image npcPortrait;
@@ -53,7 +65,11 @@ public class DialogueManager : MonoBehaviour
     public GameObject choicePanel;
     public GameObject choiceButtonPrefab;
     public Sprite defaultPortrait;
-    //public Image dialogueBackground;
+
+    public Button reviewButton; // ✅ 回看按钮
+
+    //private List<string> dialogueHistory = new List<string>(); // ✅ 存储对话历史
+    private int reviewIndex = -1; // ✅ 当前回看的对话索引，-1 表示未处于回看模式
 
     private DialogueData currentDialogueData;
     private int currentDialogueIndex;
@@ -128,6 +144,10 @@ public class DialogueManager : MonoBehaviour
                 StartDialogue(newDialogueData);
             }
             PlayBGM(sceneName);
+            // ✅ 清除历史对话记录，防止跨场景查看旧对话
+            dialogueHistory.Clear();
+            reviewIndex = -1;
+            Debug.Log("🧹 Cleared dialogue history after scene switch.");
         }
         else
         {
@@ -239,66 +259,58 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowDialogue()
     {
+        // ✅ 处理“回看模式”
+        if (reviewIndex >= 0)
+        {
+            if (reviewIndex < dialogueHistory.Count)
+            {
+                DialogueHistoryEntry entry = dialogueHistory[reviewIndex];
+                dialogueText.text = $"{entry.speaker}: {entry.content}";
+                Debug.Log($"📜 Reviewing dialogue: {entry.speaker}: {entry.content}");
+
+                UpdatePortraitsAndNames(entry.speaker, entry.portrait);
+                PlayClickSound();
+                reviewIndex++; // 在“回看模式”中前进
+                return; // ✅ 在“回看模式”中，阻止正常对话逻辑执行
+            }
+            else
+            {
+                reviewIndex = -1; // ✅ 自动退出“回看模式”
+                currentDialogueIndex = Mathf.Min(currentDialogueIndex, dialogueHistory.Count);            // ✅ 自动退出“回看模式”，同步对话索引
+                Debug.Log("🔄 Exiting review mode, resuming normal dialogue flow.");
+            }
+        }
+
+        // ✅ 正常对话模式
         if (currentDialogueIndex < currentDialogueData.dialogues.Count)
         {
             Dialogue dialogue = currentDialogueData.dialogues[currentDialogueIndex];
             dialogueText.text = dialogue.content;
-            //AdjustDialogueBackground();
 
-            if (nextDialogueSound != null && audioSource != null)
+            dialogueHistory.Add(new DialogueHistoryEntry
             {
-                audioSource.PlayOneShot(nextDialogueSound); // ✅ 播放对话推进音效
-            }
+                speaker = dialogue.speaker,
+                content = dialogue.content,
+                portrait = dialogue.portrait
+            });
+            Debug.Log($"New dialogue shown: {dialogue.speaker}: {dialogue.content}");
 
-            if (dialogue.speaker == "Player")
-            {
-                // 玩家发言，保持上一个 NPC 名字
-                playerPortrait.sprite = dialogue.portrait;
-                playerPortrait.gameObject.SetActive(true);
-                npcPortrait.gameObject.SetActive(true); // NPC 头像仍然可见
-
-                playerNameText.text = "Caesar"; // 玩家名字固定
-                npcNameText.text = lastNpcName; // 保持上次 NPC 名字
-
-                // 设置透明度：玩家 100%，NPC 50%
-                SetPortraitOpacity(playerPortrait, normalOpacity);
-                SetPortraitOpacity(npcPortrait, dimOpacity);
-            }
-            else if(dialogue.speaker == "Narrator")
-            {
-                playerNameText.text = "";
-                npcNameText.text = "";
-                playerPortrait.sprite = defaultPortrait;
-                npcPortrait.sprite = defaultPortrait;
-                SetPortraitOpacity(playerPortrait, dimOpacity);
-                SetPortraitOpacity(npcPortrait, dimOpacity);
-            }
-            else
-            {
-                // NPC 说话，更新 NPC 名字，并存储为 `lastNpcName`
-                npcPortrait.sprite = dialogue.portrait;
-                npcPortrait.gameObject.SetActive(true);
-                playerPortrait.gameObject.SetActive(true); // 玩家头像始终可见
-
-                playerNameText.text = "Caesar"; // 玩家名字固定
-                npcNameText.text = dialogue.speaker; // 显示 NPC 名字
-                lastNpcName = dialogue.speaker; // 记录 NPC 名字，供下次使用
-
-                // 设置透明度：NPC 100%，玩家 50%
-                SetPortraitOpacity(npcPortrait, normalOpacity);
-                SetPortraitOpacity(playerPortrait, dimOpacity);
-            }
-
+            UpdatePortraitsAndNames(dialogue.speaker, dialogue.portrait);
+            PlayClickSound();
             nextButton.gameObject.SetActive(true);
             choicePanel.SetActive(false);
         }
         else
-        {        // ✅ 处理 followUpDialogues 结束后是否切换场景
+        {
             if (!string.IsNullOrEmpty(currentNextScene))
             {
                 Debug.Log($"Follow-up dialogues finished. Switching to {currentNextScene}");
-                LoadVirtualScene(currentNextScene); // ✅ 结束后自动切换
-                currentNextScene = ""; // ✅ 清空，防止错误调用
+                LoadVirtualScene(currentNextScene);
+                currentNextScene = "";
+
+                dialogueHistory.Clear();
+                reviewIndex = -1;
+                Debug.Log("🧹 Cleared dialogue history after scene switch.");
             }
             else
             {
@@ -306,19 +318,116 @@ public class DialogueManager : MonoBehaviour
             }
         }
     }
-    //private void AdjustDialogueBackground()
-    //{
-    //    if (dialogueBackground != null && dialogueText != null)
-    //    {
-    //        // 获取文本的 `RectTransform`
-    //        RectTransform textRect = dialogueText.GetComponent<RectTransform>();
-    //        RectTransform bgRect = dialogueBackground.GetComponent<RectTransform>();
 
-    //        // 让背景大小适应文本
-    //        bgRect.sizeDelta = new Vector2(textRect.sizeDelta.x + 40f, textRect.sizeDelta.y + 20f);
-    //    }
-    //}
+    // ✅ 进入“回看模式”，从最后一条对话开始回看
+    public void ReviewPreviousDialogue()
+    {
+        if (dialogueHistory.Count == 0)
+        {
+            Debug.LogWarning("⚠️ No dialogue history to review.");
+            return;
+        }
 
+        if (choicePanel.activeSelf)
+        {
+            choicePanel.SetActive(false);
+            nextButton.gameObject.SetActive(true);
+        }
+
+        if (reviewIndex == -1)
+        {
+            reviewIndex = Mathf.Max(0, dialogueHistory.Count - 1); // ✅ 从最后一条开始回看
+        }
+        else if (reviewIndex > 0)
+        {
+            reviewIndex--;
+        }
+
+        if (reviewIndex >= 0 && reviewIndex < dialogueHistory.Count)
+        {
+            DialogueHistoryEntry entry = dialogueHistory[reviewIndex];
+            dialogueText.text = $"{entry.speaker}: {entry.content}";
+            Debug.Log($"📜 Reviewing previous dialogue: {entry.speaker}: {entry.content}");
+
+            // ✅ 同步显示头像和名字
+            UpdatePortraitsAndNames(entry.speaker, entry.portrait);
+            PlayClickSound();
+        }
+    }
+
+    // ✅ 在正常对话模式和回看模式之间切换
+    public void ShowNextDialogue()
+    {
+        if (reviewIndex >= 0)
+        {
+            reviewIndex++; // 退出回看模式
+            if (reviewIndex >= dialogueHistory.Count)
+            {
+                reviewIndex = -1; // 结束回看，恢复正常对话播放
+                ShowDialogue();
+            }
+            else
+            {
+                DialogueHistoryEntry entry = dialogueHistory[reviewIndex];
+                dialogueText.text = $"{entry.speaker}: {entry.content}";
+                Debug.Log($"📜 Forward reviewing dialogue: {entry.speaker}: {entry.content}");
+
+                // ✅ 同步显示头像和名字
+                UpdatePortraitsAndNames(entry.speaker, entry.portrait);
+            }
+        }
+        else
+        {
+            ShowDialogue();
+        }
+    }
+    // ✅ 统一处理头像和名字的显示
+    private void UpdatePortraitsAndNames(string speaker, Sprite portrait)
+    {
+        if (speaker == "Player")
+        {
+            playerPortrait.sprite = portrait;
+            playerPortrait.gameObject.SetActive(true);
+            npcPortrait.gameObject.SetActive(true);
+
+            playerNameText.text = "Caesar";
+            npcNameText.text = lastNpcName;
+
+            SetPortraitOpacity(playerPortrait, normalOpacity);
+            SetPortraitOpacity(npcPortrait, dimOpacity);
+        }
+        else if (speaker == "Narrator")
+        {
+            playerNameText.text = "";
+            npcNameText.text = "";
+            playerPortrait.sprite = defaultPortrait;
+            npcPortrait.sprite = defaultPortrait;
+
+            SetPortraitOpacity(playerPortrait, dimOpacity);
+            SetPortraitOpacity(npcPortrait, dimOpacity);
+        }
+        else
+        {
+            npcPortrait.sprite = portrait;
+            npcPortrait.gameObject.SetActive(true);
+            playerPortrait.gameObject.SetActive(true);
+
+            playerNameText.text = "Caesar";
+            npcNameText.text = speaker;
+            lastNpcName = speaker;
+
+            SetPortraitOpacity(npcPortrait, normalOpacity);
+            SetPortraitOpacity(playerPortrait, dimOpacity);
+        }
+    }
+
+    private void PlayClickSound()
+    {
+        if (nextDialogueSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(nextDialogueSound);
+        }
+    }
 
     private void SetPortraitOpacity(Image portrait, float opacity)
     {
@@ -492,23 +601,23 @@ public class DialogueManager : MonoBehaviour
                 break;
         }
     }
-    private void ShowGameEnding()
-    {
-        if (LoyaltyManager.Instance == null)
-        {
-            Debug.LogError(" LoyaltyManager is NULL! Cannot determine game ending.");
-            return;
-        }
+    //private void ShowGameEnding()
+    //{
+    //    if (LoyaltyManager.Instance == null)
+    //    {
+    //        Debug.LogError(" LoyaltyManager is NULL! Cannot determine game ending.");
+    //        return;
+    //    }
 
-        string ending = LoyaltyManager.Instance.DetermineGameEnding();
-        Debug.Log(" Game Ending: " + ending);
+    //    string ending = LoyaltyManager.Instance.DetermineGameEnding();
+    //    Debug.Log(" Game Ending: " + ending);
 
-        // 在对话框里显示游戏结局
-        dialogueText.text = ending;
+    //    // 在对话框里显示游戏结局
+    //    dialogueText.text = ending;
 
-        // 禁用 "Next" 按钮（游戏结束）
-        nextButton.gameObject.SetActive(false);
-    }
+    //    // 禁用 "Next" 按钮（游戏结束）
+    //    nextButton.gameObject.SetActive(false);
+    //}
 
 }
 
