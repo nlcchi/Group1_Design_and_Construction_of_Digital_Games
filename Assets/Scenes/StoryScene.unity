@@ -189,10 +189,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 40
+    m_FontSize: 60
     m_FontStyle: 3
     m_BestFit: 0
-    m_MinSize: 4
+    m_MinSize: 0
     m_MaxSize: 300
     m_Alignment: 1
     m_AlignByGeometry: 0
@@ -571,11 +571,12 @@ MonoBehaviour:
   storyText: {fileID: 284023998}
   nextButton: {fileID: 625187599}
   storyLines:
-  - 000000
-  - 1111111
-  - 222222
-  - 33333
-  textDelay: 1
+  - Rome has known war. Rome has known chaos. But now, Rome knows victory.
+  - "Julius Caesar has crushed Pompey\u2019s legions and returned to the city as
+    its undisputed ruler. The Senate, once the heart of the Republic, now bows before
+    a single man. They call him \u2018Dictator.\u2019 Some call him a savior. Others
+    whisper of a tyrant"
+  textDelay: 10
 --- !u!4 &467901486
 Transform:
   m_ObjectHideFlags: 0
@@ -823,7 +824,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.960133, b: 0.81446534, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
