@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class DialogueManager : MonoBehaviour
 {
+    public Button replayButton; // ✅ Replay 按钮
     private void Awake()
     {
         if (Instance == null)
@@ -19,6 +20,16 @@ public class DialogueManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    private void Start()
+    {
+        // ✅ 确保 Replay 按钮在开始时隐藏
+        if (replayButton != null)
+        {
+            replayButton.gameObject.SetActive(false);
+            Debug.Log("🔒 Replay button is hidden at the start.");
+        }
+    }
+
 
     [System.Serializable]
     public class Dialogue
@@ -95,7 +106,15 @@ public class DialogueManager : MonoBehaviour
     private Dictionary<string, (Sprite, DialogueData)> sceneDatabase = new Dictionary<string, (Sprite, DialogueData)>();
 
     public static DialogueManager Instance;
+    public string GetCurrentSceneName()
+    {
+        return lastSceneName; // 使用 lastSceneName 作为当前虚拟场景名称
+    }
 
+    public int GetCurrentDialogueIndex()
+    {
+        return currentDialogueIndex;
+    }
     // Register a virtual scene
     public void RegisterScene(string sceneName, Sprite background, DialogueData dialogueData, AudioClip bgmClip)
     {
@@ -123,6 +142,19 @@ public class DialogueManager : MonoBehaviour
         if (lastSceneName == sceneName)
         {
             Debug.LogWarning($"⚠️ Scene '{sceneName}' is already active. Skipping redundant load.");
+            // 激活replay按钮（这里利用了一个bug，是取巧的做法）
+            if (sceneName == "TemporaryFinalScene")
+            {
+                if (replayButton != null)
+                {
+                    replayButton.gameObject.SetActive(true);
+                    Debug.Log("🎯 Replay button is now visible.");
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ Replay button is not assigned in the Inspector.");
+                }
+            }
             return;
         }
 
@@ -276,7 +308,7 @@ public class DialogueManager : MonoBehaviour
             else
             {
                 reviewIndex = -1; // ✅ 自动退出“回看模式”
-                currentDialogueIndex = Mathf.Min(currentDialogueIndex, dialogueHistory.Count);            // ✅ 自动退出“回看模式”，同步对话索引
+                currentDialogueIndex = Mathf.Min(currentDialogueIndex, dialogueHistory.Count);
                 Debug.Log("🔄 Exiting review mode, resuming normal dialogue flow.");
             }
         }
@@ -294,6 +326,7 @@ public class DialogueManager : MonoBehaviour
                 portrait = dialogue.portrait
             });
             Debug.Log($"New dialogue shown: {dialogue.speaker}: {dialogue.content}");
+            Debug.Log(" currentDialogueData.dialogues.Count:" + currentDialogueData.dialogues.Count);
 
             UpdatePortraitsAndNames(dialogue.speaker, dialogue.portrait);
             PlayClickSound();
@@ -315,9 +348,12 @@ public class DialogueManager : MonoBehaviour
             else
             {
                 ShowChoices();
+
+
             }
         }
     }
+
 
     // ✅ 进入“回看模式”，从最后一条对话开始回看
     public void ReviewPreviousDialogue()
@@ -601,23 +637,7 @@ public class DialogueManager : MonoBehaviour
                 break;
         }
     }
-    //private void ShowGameEnding()
-    //{
-    //    if (LoyaltyManager.Instance == null)
-    //    {
-    //        Debug.LogError(" LoyaltyManager is NULL! Cannot determine game ending.");
-    //        return;
-    //    }
 
-    //    string ending = LoyaltyManager.Instance.DetermineGameEnding();
-    //    Debug.Log(" Game Ending: " + ending);
-
-    //    // 在对话框里显示游戏结局
-    //    dialogueText.text = ending;
-
-    //    // 禁用 "Next" 按钮（游戏结束）
-    //    nextButton.gameObject.SetActive(false);
-    //}
 
 }
 

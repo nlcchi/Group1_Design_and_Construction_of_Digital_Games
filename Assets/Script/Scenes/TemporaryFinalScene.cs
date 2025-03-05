@@ -1,9 +1,14 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class TemporaryFinalScene : MonoBehaviour
 {
+    public UnityEngine.UI.Button replayButton; // ✅ 通过命名空间明确指定 UI Button
     public Sprite AssassinationEndingbackground;
     public Sprite RomeUnderCaesarbackground;
     public Sprite BrutusTurnsAgainstYoubackground;
@@ -122,6 +127,15 @@ public class TemporaryFinalScene : MonoBehaviour
             loyaltySummary += $"Mark Antony: {markAntonyLoyalty}, ";
             loyaltySummary += $"Senate: {senateLoyalty}";
 
+            //if (replayButton != null
+            //    && DialogueManager.Instance != null
+            //    && DialogueManager.Instance.GetCurrentSceneName() == "TemporaryFinalScene"
+            //    && DialogueManager.Instance.GetCurrentDialogueIndex() >= endingDialogues.Count - 1)
+            //{
+            //    replayButton.gameObject.SetActive(true);
+            //    Debug.Log("🎯 Replay button is now visible.");
+            //}
+
             Debug.Log($"📊 Final Loyalty Summary: {loyaltySummary}");
             endingDialogues.Add(new DialogueManager.Dialogue { speaker = "Narrator", content = loyaltySummary });
         }
@@ -137,6 +151,37 @@ public class TemporaryFinalScene : MonoBehaviour
         };
 
         DialogueManager.Instance.RegisterScene("TemporaryFinalScene", finalBackground, sceneDialogue, finalMusic);
+    }
+
+    // ✅ 重播游戏的方法
+    public void ReplayGame()
+    {
+        Debug.Log("🔄 Replay button clicked. Resetting game state...");
+
+        // ✅ 停止所有正在播放的音乐
+        if (DialogueManager.Instance != null && DialogueManager.Instance.audioSource != null)
+        {
+            DialogueManager.Instance.audioSource.Stop();
+            Debug.Log("🔇 All background music and sounds have been stopped.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ AudioSource is NULL. Cannot stop sounds.");
+        }
+
+        // ✅ 重置所有角色的忠诚度
+        if (LoyaltyManager.Instance != null)
+        {
+            LoyaltyManager.Instance.ResetAllLoyalty();
+            Debug.Log("🧹 All character loyalties have been reset.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ LoyaltyManager instance is NULL. Cannot reset loyalties.");
+        }
+
+        // ✅ 跳转到主菜单场景 (真实的 Unity Scene)
+        SceneManager.LoadScene("Menu");
     }
 
 }

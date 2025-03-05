@@ -565,7 +565,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 467901484}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb64f4039bd8c094687ba9bec63eb4c5, type: 3}
+  m_Script: {fileID: 11500000, guid: 3bc94d4089ca96948a581903031eff56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   storyText: {fileID: 284023998}
@@ -575,7 +575,7 @@ MonoBehaviour:
   - "Julius Caesar has crushed Pompey\u2019s legions and returned to the city as
     its undisputed ruler. The Senate, once the heart of the Republic, now bows before
     a single man. They call him \u2018Dictator.\u2019 Some call him a savior. Others
-    whisper of a tyrant"
+    whisper of a tyrant."
   textDelay: 10
 --- !u!4 &467901486
 Transform:

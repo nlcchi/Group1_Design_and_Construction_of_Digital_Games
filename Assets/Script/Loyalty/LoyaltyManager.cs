@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using TMPro;
+using System.Linq;
 
 public class LoyaltyManager : MonoBehaviour
 {
@@ -156,5 +157,11 @@ public class LoyaltyManager : MonoBehaviour
 
         // 默认结局
         return "Caesar's fate remains uncertain, with alliances shifting.";
+    }
+    // ✅ 重置所有角色的忠诚度
+    public void ResetAllLoyalty()
+    {
+        npcLoyalty = npcLoyalty.ToDictionary(pair => pair.Key, pair => 0);
+        Debug.Log("🧹 All character loyalties have been reset to 0.");
     }
 }
