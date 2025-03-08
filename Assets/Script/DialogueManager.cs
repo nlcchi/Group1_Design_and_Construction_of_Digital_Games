@@ -632,6 +632,43 @@ public class DialogueManager : MonoBehaviour
                 LoyaltyManager.Instance.ChangeLoyalty("Mark Antony", 1);
                 break;
 
+            case "You make your way to the Senate":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+
+                // ✅ 在这里启动最终场景
+                if (TemporaryFinalScene.Instance != null)
+                {
+                    TemporaryFinalScene.Instance.ActivateFinalSceneScript();
+                }
+                break;
+
+            case "Avoid the Senate":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+
+                if (TemporaryFinalScene.Instance != null)
+                {
+                    TemporaryFinalScene.Instance.ActivateFinalSceneScript();
+                }
+                break;
+
+            case "Escape from Rome":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+
+                if (TemporaryFinalScene.Instance != null)
+                {
+                    TemporaryFinalScene.Instance.ActivateFinalSceneScript();
+                }
+                break;
+
+            case "Strike first: Conspirators fall before any action.":
+                LoyaltyManager.Instance.ChangeLoyalty("Senate", -1);
+
+                if (TemporaryFinalScene.Instance != null)
+                {
+                    TemporaryFinalScene.Instance.ActivateFinalSceneScript();
+                }
+                break;
+
             default:
                 Debug.Log("No loyalty change for this choice.");
                 break;

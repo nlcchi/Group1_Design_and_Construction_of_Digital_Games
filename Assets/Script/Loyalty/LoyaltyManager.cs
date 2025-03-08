@@ -12,6 +12,11 @@ public class LoyaltyManager : MonoBehaviour
     public TMP_Text[] textValues;
     private string textValue = "";
 
+    public int IBrutus;
+    public int ICassius;
+    public int IMarkAntony;
+    public int ISenate;
+
 
     // Dictionary to track NPC loyalty
     public Dictionary<string, int> npcLoyalty = new Dictionary<string, int>();
@@ -36,6 +41,7 @@ public class LoyaltyManager : MonoBehaviour
         }
     }
 
+
     private void InitializeLoyaltyValues()
     {
         if (npcLoyalty == null || npcLoyalty.Count == 0)
@@ -47,6 +53,11 @@ public class LoyaltyManager : MonoBehaviour
             {"Mark Antony", 5},
             {"Senate", 0}
         };
+            IBrutus = npcLoyalty["Brutus"];
+            ICassius = npcLoyalty["Cassius"];
+            IMarkAntony = npcLoyalty["Mark Antony"];
+            ISenate = npcLoyalty["Senate"];
+            
             Debug.Log("🏛 Loyalty values initialized to default.");
         }
         else
@@ -119,10 +130,24 @@ public class LoyaltyManager : MonoBehaviour
     }
     public string DetermineGameEnding()
     {
-        int brutusLoyalty = GetLoyalty("Brutus");
-        int cassiusLoyalty = GetLoyalty("Cassius");
-        int antonyLoyalty = GetLoyalty("Mark Antony");
-        int senateLoyalty = GetLoyalty("Senate");
+        Debug.Log("🧐 Checking loyalty values before determining ending...");
+
+        //int brutusLoyalty = GetLoyalty("Brutus");
+        //int cassiusLoyalty = GetLoyalty("Cassius");
+        //int antonyLoyalty = GetLoyalty("Mark Antony");
+        //int senateLoyalty = GetLoyalty("Senate");
+        IBrutus = GetLoyalty("Brutus");
+        ICassius = GetLoyalty("Cassius");
+        IMarkAntony = GetLoyalty("Mark Antony");
+        ISenate = GetLoyalty("Senate");
+
+        int brutusLoyalty = IBrutus;
+        int cassiusLoyalty = ICassius;
+        int antonyLoyalty = IMarkAntony;
+        int senateLoyalty = ISenate;
+
+        Debug.Log($"📌 Brutus: {brutusLoyalty}, Cassius: {cassiusLoyalty}, Antony: {antonyLoyalty}, Senate: {senateLoyalty}");
+        Debug.Log($"阿巴阿巴, Brutus: {brutusLoyalty}, Cassius: {cassiusLoyalty}, Antony: {antonyLoyalty}, Senate: {senateLoyalty}");
 
         // 结局1：凯撒被暗杀（Brutus 和 Cassius 的忠诚度低，Senate 反对）
         if (brutusLoyalty <= 0 && cassiusLoyalty <= -3 && senateLoyalty <= -3)

@@ -15,6 +15,7 @@ public class Scene5Dialogue : MonoBehaviour
         if (DialogueManager.Instance == null)
         {
             RegisterScene5(); // ✅ 如果实例已存在，直接注册场景
+
         }
         else
         {
@@ -59,8 +60,9 @@ public class Scene5Dialogue : MonoBehaviour
             }
 
 
-    };
+        };
 
         DialogueManager.Instance.RegisterScene("Scene5", backgroundScene5, sceneDialogue, scene5Music);
     }
+
 }

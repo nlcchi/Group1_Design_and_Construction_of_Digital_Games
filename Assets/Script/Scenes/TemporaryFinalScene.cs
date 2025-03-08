@@ -6,8 +6,11 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
+
 public class TemporaryFinalScene : MonoBehaviour
 {
+    public static TemporaryFinalScene Instance; // ✅ 添加单例
+
     public UnityEngine.UI.Button replayButton; // ✅ 通过命名空间明确指定 UI Button
     public Sprite AssassinationEndingbackground;
     public Sprite RomeUnderCaesarbackground;
@@ -20,8 +23,23 @@ public class TemporaryFinalScene : MonoBehaviour
     public AudioClip ExileMusic;
     public AudioClip TheBloodyTyrantMusic;
 
+    void Awake()
+    {
+        // ✅ 确保 `Instance` 是唯一的
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject); // 防止重复
+        }
+
+        enabled = false; // 默认关闭
+    }
     void Start()
     {
+        enabled = false;    //
         StartCoroutine(WaitForDialogueManager());
     }
 
@@ -31,7 +49,7 @@ public class TemporaryFinalScene : MonoBehaviour
         {
             yield return null;
         }
-
+        Debug.LogError("Check RegisterTemporaryFinalScene");
         RegisterTemporaryFinalScene();
     }
 
@@ -184,5 +202,10 @@ public class TemporaryFinalScene : MonoBehaviour
         SceneManager.LoadScene("Menu");
     }
 
+    public void ActivateFinalSceneScript()
+    {
+        enabled = true;
+        Debug.Log("✅ TemporaryFinalScene 已激活！");
+    }
 }
 
