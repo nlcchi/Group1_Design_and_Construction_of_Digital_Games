@@ -61,15 +61,15 @@ public class Scene4Dialogue : MonoBehaviour
             {
                 new DialogueManager.Choice { text = "Stay Home on March 15", nextScene = "Scene5",
                     followUpDialogues = new List<DialogueManager.Dialogue>
-                {
+                {   new DialogueManager.Dialogue {speaker = "Narrator" ,content = "You gave in, you coward, but this might be a good way to save your life..." }
             } },
                 new DialogueManager.Choice { text = "Go to the Senate", nextScene = "Scene5",
                     followUpDialogues = new List<DialogueManager.Dialogue>
-                {
+                {   new DialogueManager.Dialogue {speaker = "Narrator" ,content = "You have confidence that your power is secure, you march toward the Senate..." }
             }  },
                 new DialogueManager.Choice { text = "Fake Your Death to Catch the Conspirators", nextScene = "Scene5",
                     followUpDialogues = new List<DialogueManager.Dialogue>
-                {
+                {   new DialogueManager.Dialogue {speaker = "Narrator" ,content = "You panicked and decided to strike first... Although innocent people might be affected,..." }
             } }
             }
 

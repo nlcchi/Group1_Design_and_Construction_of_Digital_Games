@@ -180,12 +180,17 @@ public class TemporaryFinalScene : MonoBehaviour
         if (DialogueManager.Instance != null && DialogueManager.Instance.audioSource != null)
         {
             DialogueManager.Instance.audioSource.Stop();
+            DialogueManager.Instance.audioSource.clip = null;
             Debug.Log("🔇 All background music and sounds have been stopped.");
         }
         else
         {
             Debug.LogWarning("⚠️ AudioSource is NULL. Cannot stop sounds.");
         }
+
+        // ✅ 全局静音，防止切换场景后音乐残留
+        //AudioListener.pause = true;
+        //Debug.Log("🔇 All audio sources globally paused.");
 
         // ✅ 重置所有角色的忠诚度
         if (LoyaltyManager.Instance != null)
@@ -198,9 +203,11 @@ public class TemporaryFinalScene : MonoBehaviour
             Debug.LogWarning("⚠️ LoyaltyManager instance is NULL. Cannot reset loyalties.");
         }
 
+        Destroy(DialogueManager.Instance.gameObject);
         // ✅ 跳转到主菜单场景 (真实的 Unity Scene)
         SceneManager.LoadScene("Menu");
     }
+
 
     public void ActivateFinalSceneScript()
     {

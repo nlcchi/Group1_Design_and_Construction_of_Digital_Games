@@ -10,6 +10,9 @@ public class DialogueManager : MonoBehaviour
     public Button replayButton; // ✅ Replay 按钮
     private void Awake()
     {
+        // ✅ 取消全局静音，恢复音频播放
+        AudioListener.pause = false;
+        Debug.Log("🔊 Audio resumed in the main menu.");
         if (Instance == null)
         {
             Instance = this;
@@ -22,6 +25,7 @@ public class DialogueManager : MonoBehaviour
     }
     private void Start()
     {
+
         // ✅ 确保 Replay 按钮在开始时隐藏
         if (replayButton != null)
         {
@@ -29,7 +33,15 @@ public class DialogueManager : MonoBehaviour
             Debug.Log("🔒 Replay button is hidden at the start.");
         }
     }
-
+    //private void OnDestroy()
+    //{
+    //    if (audioSource != null)
+    //    {
+    //        audioSource.Stop();
+    //        audioSource.clip = null;
+    //        Debug.Log("🔇 AudioSource destroyed and music stopped.");
+    //    }
+    //}
 
     [System.Serializable]
     public class Dialogue

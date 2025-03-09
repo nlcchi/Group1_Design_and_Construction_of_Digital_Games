@@ -49,14 +49,15 @@ public class Scene5Dialogue : MonoBehaviour
                 new DialogueManager.Dialogue { speaker = "Narrator", content = "The sun rises on the Ides of March. The city is tense. Your allies await your final decision." },
                 new DialogueManager.Dialogue { speaker = "Narrator", content = "Mark Antony warns you not to go to the Senate, but Brutus and Cassius insist it is just another day. The Senate chambers are filled with men who may want you dead." },
                 new DialogueManager.Dialogue { speaker = "Narrator", content = "The decision you make now will determine the fate of Rome—and your own survival." },
-                new DialogueManager.Dialogue { speaker = "Narrator", content = "The moment has come. Will you walk into history, or shape your own destiny?" }
+                new DialogueManager.Dialogue { speaker = "Narrator", content = "The moment has come. Will you walk into history, or shape your own destiny?" },
+                new DialogueManager.Dialogue { speaker = "Narrator", content = " " }
             },
             choices = new List<DialogueManager.Choice>
             {
                 new DialogueManager.Choice { text = "You make your way to the Senate", nextScene = "TemporaryFinalScene" },
                 new DialogueManager.Choice { text = "Avoid the Senate", nextScene = "TemporaryFinalScene" },
                 new DialogueManager.Choice { text = "Escape from Rome", nextScene = "TemporaryFinalScene", forcedEnding = "Exile Ending – Caesar Flees Before Assassination" },
-                new DialogueManager.Choice { text = "Strike first: Conspirators fall before any action.", nextScene = "TemporaryFinalScene", forcedEnding = "The Bloody Tyrant Ending – Rule by Fear" }
+                new DialogueManager.Choice { text = "Strike first: Conspirators fall", nextScene = "TemporaryFinalScene", forcedEnding = "The Bloody Tyrant Ending – Rule by Fear" }
             }
 
 
